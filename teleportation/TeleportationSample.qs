@@ -6,85 +6,68 @@ namespace Microsoft.Quantum.Samples.Teleportation {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Measurement;
 
-    //////////////////////////////////////////////////////////////////////////
-    // Introduction //////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
+//Teleportation Demo: 
     // Quantum teleportation provides a way of moving a quantum state from one
     // location  to another without having to move physical particle(s) along
     // with it. This is done with the help of previously shared quantum
     // entanglement between the sending and the receiving locations and
     // classical communication.
 
-    //////////////////////////////////////////////////////////////////////////
-    // Teleportation /////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
 
 
-    /// # Summary
-    /// Sends the state of one qubit to a target qubit by using
-    /// teleportation.
-    ///
-    /// Notice that after calling Teleport, the state of `msg` is
-    /// collapsed.
-    ///
-    /// # Input
-    /// ## msg
-    /// A qubit whose state we wish to send.
-    /// ## target
-    /// A qubit initially in the |0〉 state that we want to send
-    /// the state of msg to.
+    // Sends the state of one qubit to a target qubit by using teleportation.
+    // Notice that after calling Teleport, the state of `msg` is collapsed.
+
+    //Teleport takes 2 Qubits as inputs: msg and target
     operation Teleport (msg : Qubit, target : Qubit) : Unit {
+        //First, allocate 1 qubit to hold the entanglement 
         use register = Qubit();
-        // Create some entanglement that we can use to send our message.
-       
+
+        //Create some entanglement that we can use to send our message.
+        //Using the Hadmord and CNOT Gate 
+        //H: Takes the state 0 to 0 + 1 and state 1 to 0 - 1 ***
         H(register); 
+
+        //After placing the register into a superposition 
+        //We apply a the register and target to a CNOT gate
+        //CNOT flips the value of the target qubit if the register is 1 (like XOR gate)
+        //These two operations together enables us to create entanglement 
+        //between the register and target qubits
         CNOT(register, target);
 
-        // Encode the message into the entangled pair.
+        //Now we Load the message into the entangled pair.
         CNOT(msg, register);
         H(msg);
 
         // Measure the qubits to extract the classical data we need to
         // decode the message by applying the corrections on
         // the target qubit accordingly.
-        // We use MResetZ from the Microsoft.Quantum.Measurement namespace
-        // to reset our qubits as we go.
         if (MResetZ(msg) == One) { Z(target); }
-        // We can also use library functions such as IsResultOne to write
-        // out correction steps. This is especially helpful when composing
-        // conditionals with other functions and operations, or with partial
-        // application.
         if (IsResultOne(MResetZ(register))) { X(target); }
     }
+    
 
-    // One can use quantum teleportation circuit to send an unobserved
-    // (unknown) classical message from source qubit to target qubit
-    // by sending specific (known) classical information from source
-    // to target.
-
-    /// # Summary
-    /// Uses teleportation to send a classical message from one qubit
-    /// to another.
-    ///
-    /// # Input
-    /// ## message
-    /// If `true`, the source qubit (`here`) is prepared in the
-    /// |1〉 state, otherwise the source qubit is prepared in |0〉.
-    ///
-    /// ## Output
-    /// The result of a Z-basis measurement on the teleported qubit,
-    /// represented as a Bool.
+    // Uses teleportation to send a classical message from one qubit to another.
+    // # Input
+    // ## message
+    // If `true`, the source qubit (`here`) is prepared in the |1〉 state, 
+    //Otherwise the source qubit is prepared in |0〉.
+    //
+    // ## Output*********
+    // The result of a Z-basis measurement on the teleported qubit,
+    // represented as a Bool.
     operation TeleportClassicalMessage (message : Bool) : Bool {
-        // Ask for some qubits that we can use to teleport.
+        //Allocate 2 registers to store quantum information initially assigned to state 0
+        //We have allocated 2 Qubits msg, target
         use (msg, target) = (Qubit(), Qubit());
 
-        // Encode the message we want to send.
+        //Encode the message we want to send into the msg qubit by applying X operation.
+        //It's like a NOT in classical logic 
         if (message) {
             X(msg);
         }
 
-        // Use the operation we defined above.
+        // To teleport the message use the teleport operation we defined above.
         Teleport(msg, target);
 
         // Check what message was sent.
