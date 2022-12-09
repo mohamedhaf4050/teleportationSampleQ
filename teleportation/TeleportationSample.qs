@@ -39,7 +39,7 @@ namespace Microsoft.Quantum.Samples.Teleportation {
         CNOT(msg, register);
         H(msg);
 
-        // Measure the qubits to extract the classical data we need to
+        // Measure the qubits using the M method to extract the classical data we need to
         // decode the message by applying the corrections on
         // the target qubit accordingly.
         if (MResetZ(msg) == One) { Z(target); }
@@ -73,46 +73,5 @@ namespace Microsoft.Quantum.Samples.Teleportation {
         // Check what message was sent.
         return MResetZ(target) == One;
     }
-
-    // One can also use quantum teleportation to send any quantum state
-    // without losing any information. The following sample shows
-    // how a randomly picked non-trivial state (|-> or |+>)
-    // gets moved from one qubit to another.
-
-    /// # Summary
-    /// Uses teleportation to send a randomly picked |-> or |+> state
-    /// to another.
-    operation TeleportRandomMessage () : Unit {
-        // Ask for some qubits that we can use to teleport.
-        use (msg, target) = (Qubit(), Qubit());
-        PrepareRandomMessage(msg);
-
-        // Use the operation we defined above.
-        Teleport(msg, target);
-
-        // Report message received:
-        if (MeasureIsPlus(target))  { Message("Received |+>"); }
-        if (MeasureIsMinus(target)) { Message("Received |->"); }
-
-        // Reset all of the qubits that we used before releasing
-        // them.
-        Reset(msg);
-        Reset(target);
-    }
 }
-
-// ////////////////////////////////////////////////////////////////////////
-// Other teleportation scenarios not illustrated here
-// ////////////////////////////////////////////////////////////////////////
-
-// ● Teleport a rotation. Rotate a basis state by a certain angle φ ∈ [0, 2π),
-// for example by preparing Rₓ(φ) |0〉, and teleport the rotated state to the target qubit.
-// When successful, the target qubit captures the angle φ [although, on course one does
-// not have classical access to its value].
-// ● "Super dense coding".  Given an EPR state |β〉 shared between the source and target
-// qubits, the source can encode two classical bits a,b by applying Z^b X^a to its half
-// of |β〉. Both bits can be recovered on the target by measurement in the Bell basis.
-// For details refer to discussion and code in Unit Testing Sample, in file SuperdenseCoding.qs.
-// ////////////////////////////////////////////////////////////////////////
-
 
